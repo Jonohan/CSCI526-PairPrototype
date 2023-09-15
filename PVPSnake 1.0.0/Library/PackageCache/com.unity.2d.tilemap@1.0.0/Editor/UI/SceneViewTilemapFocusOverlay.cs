@@ -6,11 +6,7 @@ using UnityEngine.UIElements;
 
 namespace UnityEditor.Tilemaps
 {
-    [Overlay(typeof(SceneView), k_OverlayId, k_DisplayName
-        , defaultDockZone = DockZone.RightColumn
-        , defaultDockPosition = DockPosition.Bottom
-        , defaultDockIndex = 0
-        , defaultLayout = Layout.Panel)]
+    [Overlay(typeof(SceneView), k_OverlayId, k_DisplayName)]
     internal class SceneViewTilemapFocusOverlay : ToolbarOverlay, ITransientOverlay
     {
         internal const string k_OverlayId = "Scene View/Tilemap Focus";
@@ -20,9 +16,8 @@ namespace UnityEditor.Tilemaps
         {}
 
         public bool visible =>
-            GridPaintingState.defaultBrush != null
-                && GridPaintingState.scenePaintTarget != null
-                && GridPaintingState.isEditing;
+            GridPaintingState.defaultBrush != null && GridPaintingState.scenePaintTarget != null &&
+            GridPaintPaletteWindow.isActive;
     }
 
     [EditorToolbarElement("Tile Palette/Focus Label")]
@@ -46,28 +41,11 @@ namespace UnityEditor.Tilemaps
         }
     }
 
-    /// <summary>
-    /// A `VisualElement` displaying a `Dropdown` for selecting the Focus Mode while painting on Tilemaps.
-    /// </summary>
     [EditorToolbarElement("Tile Palette/Focus Dropdown")]
-    public sealed class TilePaletteFocusDropdown : EditorToolbarDropdown
+    sealed class TilePaletteFocusDropdown : EditorToolbarDropdown
     {
-        /// <summary>
-        /// A factory for `TilePaletteFocusDropdown`.
-        /// </summary>
-        public class TilePaletteFocusDropdownFactory : UxmlFactory<TilePaletteFocusDropdown, TilePaletteFocusDropdownUxmlTraits> {}
-        /// <summary>
-        /// UxmlTraits for `TilePaletteFocusDropdown`.
-        /// </summary>
-        public class TilePaletteFocusDropdownUxmlTraits : UxmlTraits {}
-
         const string k_DropdownIconClass = "unity-toolbar-dropdown-label-icon";
         const string k_ToolSettingsClass = "unity-tool-settings";
-
-        private static readonly string k_Name = L10n.Tr("Focus Dropdown");
-        private static readonly string k_FocusNoneIconPath = "Packages/com.unity.2d.tilemap/Editor/Icons/Tilemap.FocusNone.png";
-        private static readonly string k_FocusTilemapIconPath = "Packages/com.unity.2d.tilemap/Editor/Icons/Tilemap.FocusTilemap.png";
-        private static readonly string k_FocusGridIconPath = "Packages/com.unity.2d.tilemap/Editor/Icons/Tilemap.FocusGrid.png";
 
         readonly TextElement m_Label;
         readonly VisualElement m_Icon;
@@ -76,23 +54,20 @@ namespace UnityEditor.Tilemaps
         readonly GUIContent m_Tilemap;
         readonly GUIContent m_Grid;
 
-        /// <summary>
-        /// Constructor for `TilePaletteFocusDropdown`.
-        /// </summary>
         public TilePaletteFocusDropdown()
         {
-            name = k_Name;
+            name = "Focus Dropdown";
             AddToClassList(k_ToolSettingsClass);
 
             m_None = EditorGUIUtility.TrTextContentWithIcon("None",
                 "Focus Mode is not active.",
-                EditorGUIUtility.LoadIcon(k_FocusNoneIconPath));
+                "ToolHandlePivot");
             m_Tilemap = EditorGUIUtility.TrTextContentWithIcon("Tilemap",
                 "Focuses on the active Tilemap. Filters out all other Renderers.",
-                EditorGUIUtility.LoadIcon(k_FocusTilemapIconPath));
+                "ToolHandlePivot");
             m_Grid = EditorGUIUtility.TrTextContentWithIcon("Grid",
                 "Focuses on all Renderers with the active Grid. Filters out all other Renderers.",
-                EditorGUIUtility.LoadIcon(k_FocusGridIconPath));
+                "ToolHandlePivot");
 
             clicked += OpenContextMenu;
 
@@ -102,35 +77,34 @@ namespace UnityEditor.Tilemaps
         void OpenContextMenu()
         {
             var menu = new GenericMenu();
-            var focusMode = TilemapFocusModeUtility.focusMode;
-            menu.AddItem(m_None, focusMode == TilemapFocusModeUtility.TilemapFocusMode.None, () => SetFocusMode(TilemapFocusModeUtility.TilemapFocusMode.None));
-            menu.AddItem(m_Tilemap, focusMode == TilemapFocusModeUtility.TilemapFocusMode.Tilemap, () => SetFocusMode(TilemapFocusModeUtility.TilemapFocusMode.Tilemap));
-            menu.AddItem(m_Grid, focusMode == TilemapFocusModeUtility.TilemapFocusMode.Grid, () => SetFocusMode(TilemapFocusModeUtility.TilemapFocusMode.Grid));
+            var focusMode = GridPaintPaletteWindow.focusMode;
+            menu.AddItem(m_None, focusMode == GridPaintPaletteWindow.TilemapFocusMode.None, () => SetFocusMode(GridPaintPaletteWindow.TilemapFocusMode.None));
+            menu.AddItem(m_Tilemap, focusMode == GridPaintPaletteWindow.TilemapFocusMode.Tilemap, () => SetFocusMode(GridPaintPaletteWindow.TilemapFocusMode.Tilemap));
+            menu.AddItem(m_Grid, focusMode == GridPaintPaletteWindow.TilemapFocusMode.Grid, () => SetFocusMode(GridPaintPaletteWindow.TilemapFocusMode.Grid));
             menu.DropDown(worldBound);
         }
 
-        void SetFocusMode(TilemapFocusModeUtility.TilemapFocusMode mode)
+        void SetFocusMode(GridPaintPaletteWindow.TilemapFocusMode mode)
         {
-            TilemapFocusModeUtility.SetFocusMode(mode);
+            GridPaintPaletteWindow.instances[0].SetFocusMode(mode);
             FocusModeChanged();
         }
 
         void FocusModeChanged()
         {
             var content = m_None;
-            switch (TilemapFocusModeUtility.focusMode)
+            switch (GridPaintPaletteWindow.focusMode)
             {
-                case TilemapFocusModeUtility.TilemapFocusMode.Tilemap:
+                case GridPaintPaletteWindow.TilemapFocusMode.Tilemap:
                     content = m_Tilemap;
                     break;
-                case TilemapFocusModeUtility.TilemapFocusMode.Grid:
+                case GridPaintPaletteWindow.TilemapFocusMode.Grid:
                     content = m_Grid;
                     break;
             }
-
             text = content.text;
             tooltip = content.tooltip;
-            icon = content.image as Texture2D;
+            icon = EditorGUIUtility.LoadIconRequired("TilemapRenderer Icon");
         }
     }
 }
