@@ -19,6 +19,7 @@ public class Snake : MonoBehaviour
 
     // Tail Prefab
     public GameObject tailPrefab;
+    public int ID;
 
     // Use this for initialization
     void Start()
@@ -31,14 +32,28 @@ public class Snake : MonoBehaviour
     void Update()
     {
         // Move in a new Direction?
-        if (Input.GetKey(KeyCode.RightArrow))
-            dir = Vector2.right;
-        else if (Input.GetKey(KeyCode.DownArrow))
-            dir = -Vector2.up;    // '-up' means 'down'
-        else if (Input.GetKey(KeyCode.LeftArrow))
-            dir = -Vector2.right; // '-right' means 'left'
-        else if (Input.GetKey(KeyCode.UpArrow))
-            dir = Vector2.up;
+        if (ID==1)
+        {
+            if (Input.GetKey(KeyCode.RightArrow))
+                dir = Vector2.right;
+            else if (Input.GetKey(KeyCode.DownArrow))
+                dir = -Vector2.up;    // '-up' means 'down'
+            else if (Input.GetKey(KeyCode.LeftArrow))
+                dir = -Vector2.right; // '-right' means 'left'
+            else if (Input.GetKey(KeyCode.UpArrow))
+                dir = Vector2.up;
+        } else if (ID==2)
+        {
+            if (Input.GetKey(KeyCode.D))
+                dir = Vector2.right;
+            else if (Input.GetKey(KeyCode.S))
+                dir = -Vector2.up;    // '-up' means 'down'
+            else if (Input.GetKey(KeyCode.A))
+                dir = -Vector2.right; // '-right' means 'left'
+            else if (Input.GetKey(KeyCode.W))
+                dir = Vector2.up;
+        }
+        
     }
 
     void Move()
