@@ -11,6 +11,9 @@ public class Snake : MonoBehaviour
     // (by default it moves to the right)
     Vector2 dir = Vector2.right;
 
+    //Revert
+    bool revert = false;
+
     // Keep Track of Tail
     List<Transform> tail = new List<Transform>();
 
@@ -19,6 +22,8 @@ public class Snake : MonoBehaviour
 
     // Tail Prefab
     public GameObject tailPrefab;
+
+    //Player 1 or Player 2
     public int ID;
 
     // Use this for initialization
@@ -42,6 +47,9 @@ public class Snake : MonoBehaviour
                 dir = -Vector2.right; // '-right' means 'left'
             else if (Input.GetKey(KeyCode.UpArrow))
                 dir = Vector2.up;
+            //revert?
+            else if (Input.GetKeyDown(KeyCode.RightShift))
+                revert = true;
         } else if (ID==2)
         {
             if (Input.GetKey(KeyCode.D))
@@ -52,12 +60,15 @@ public class Snake : MonoBehaviour
                 dir = -Vector2.right; // '-right' means 'left'
             else if (Input.GetKey(KeyCode.W))
                 dir = Vector2.up;
+            else if (Input.GetKeyDown(KeyCode.E))
+                revert = true;
         }
+
         
     }
 
     void Move()
-    {
+    {   
         // Save current position (gap will be here)
         Vector2 v = transform.position;
 
@@ -88,7 +99,24 @@ public class Snake : MonoBehaviour
             tail.Insert(0, tail.Last());
             tail.RemoveAt(tail.Count - 1);
         }
+
+        if (revert)
+        {   revert = false;
+            if (tail.Count > 0)
+            {
+                tail.Reverse(0, tail.Count - 1);
+                Vector2 v_curr = transform.position;
+                transform.position = tail.Last().position;
+                tail.Last().position = v_curr;
+                dir = transform.position - tail.First().position;
+            }
+            else
+            {
+                dir = -dir;
+            }
+        }
     }
+
     void OnTriggerEnter2D(Collider2D coll)
     {
         // Food?
