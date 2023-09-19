@@ -13,6 +13,9 @@ public class Snake : MonoBehaviour
     // (by default it moves to the right)
     Vector2 dir = Vector2.right;
 
+    //head collider
+    Collider2D headColl;
+
     //Revert
     bool revert = false;
 
@@ -21,6 +24,10 @@ public class Snake : MonoBehaviour
 
     // Did the snake eat something?
     bool ate = false;
+
+    //Snake will be speeding up
+    int speedUp = 0;
+    const int speedUpTime = 10;
 
     // Tail Prefab
     public GameObject tailPrefab;
@@ -39,8 +46,9 @@ public class Snake : MonoBehaviour
     void Start()
     {
         // Move the Snake every 300ms
-        InvokeRepeating("Move", 0.2f, 0.2f);
+        InvokeRepeating("Move", 0.3f, 0.3f);
         panel.SetActive(false);
+        headColl = this.gameObject.GetComponent<BoxCollider2D>();
     }
 
     // Update is called once per frame
@@ -63,6 +71,9 @@ public class Snake : MonoBehaviour
             // Cut off the tail
             else if (Input.GetKeyDown(KeyCode.Period))
                 ReplaceTailWithObstacles();
+            //Speed up
+            else if (Input.GetKeyDown(KeyCode.RightShift))
+                speedUp = speedUpTime;
 
         } else if (ID.Equals("Red"))
         {
@@ -78,6 +89,8 @@ public class Snake : MonoBehaviour
                 revert = true;
             else if (Input.GetKeyDown(KeyCode.R))
                 ReplaceTailWithObstacles();
+            else if (Input.GetKeyDown(KeyCode.Q))
+                speedUp = speedUpTime;
         }
         /*rsButton.onClick.AddListener(() => {
             SceneManager.LoadScene(0);
@@ -88,7 +101,29 @@ public class Snake : MonoBehaviour
     }
 
     void Move()
-    {   
+    {
+        headColl.transform.position = transform.position;
+        if (ID.Equals("Green"))
+            Debug.Log(ID+headColl.transform.position);
+
+        Move1StepForward();
+
+        if (speedUp > 0)
+        {
+            Vector2 v = transform.position;
+            headColl.transform.position = v - dir / 2;
+            speedUp--;
+            Move1StepForward();
+        }
+
+        if (revert)
+        {   revert = false;
+            Revert();
+        }
+    }
+
+    void Move1StepForward()
+    {
         // Save current position (gap will be here)
         Vector2 v = transform.position;
 
@@ -118,21 +153,21 @@ public class Snake : MonoBehaviour
             tail.Insert(0, tail.Last());
             tail.RemoveAt(tail.Count - 1);
         }
+    }
 
-        if (revert)
-        {   revert = false;
-            if (tail.Count > 0)
-            {
-                tail.Reverse(0, tail.Count - 1);
-                Vector2 v_curr = transform.position;
-                transform.position = tail.Last().position;
-                tail.Last().position = v_curr;
-                dir = transform.position - tail.First().position;
-            }
-            else
-            {
-                dir = -dir;
-            }
+    void  Revert()
+    {
+        if (tail.Count > 0)
+        {
+            tail.Reverse(0, tail.Count - 1);
+            Vector2 v_curr = transform.position;
+            transform.position = tail.Last().position;
+            tail.Last().position = v_curr;
+            dir = transform.position - tail.First().position;
+        }
+        else
+        {
+            dir = -dir;
         }
     }
 
@@ -161,16 +196,24 @@ public class Snake : MonoBehaviour
             switch (coll.gameObject.name)
             {
                 case "BorderTop":
+                    Debug.Log(ID + " BorderTop");
                     transform.localPosition = new Vector3(transform.localPosition.x, -transform.localPosition.y + 1, transform.localPosition.z);
+                    headColl.transform.position = transform.position;
                     break;
                 case "BorderBottom":
+                    Debug.Log(ID + "BorderBottom");
                     transform.localPosition = new Vector3(transform.localPosition.x, -transform.localPosition.y - 1, transform.localPosition.z);
+                    headColl.transform.position = transform.position;
                     break;
                 case "BorderLeft":
+                    Debug.Log(ID + "BorderLeft");
                     transform.localPosition = new Vector3(-transform.localPosition.x - 1, transform.localPosition.y, transform.localPosition.z);
+                    headColl.transform.position = transform.position;
                     break;
                 case "BorderRight":
+                    Debug.Log(ID + "BorderRight");
                     transform.localPosition = new Vector3(-transform.localPosition.x + 1, transform.localPosition.y, transform.localPosition.z);
+                    headColl.transform.position = transform.position;
                     break;
                 default: // Collided with Other snakes
                     Debug.Log(coll.gameObject.name);
