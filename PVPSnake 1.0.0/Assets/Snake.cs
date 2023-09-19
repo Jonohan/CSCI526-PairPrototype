@@ -25,8 +25,8 @@ public class Snake : MonoBehaviour
     // Tail Prefab
     public GameObject tailPrefab;
 
-    //Player 1 or Player 2
-    public int ID;
+    // 1 - Green, 2 - Red
+    public string ID;
 
     public GameObject panel;
     public Text textComponent;
@@ -44,7 +44,7 @@ public class Snake : MonoBehaviour
     void Update()
     {
         // Move in a new Direction?
-        if (ID==1)
+        if (ID.Equals("Green"))
         {
             if (Input.GetKey(KeyCode.RightArrow))
                 dir = Vector2.right;
@@ -57,7 +57,7 @@ public class Snake : MonoBehaviour
             //revert?
             else if (Input.GetKeyDown(KeyCode.RightShift))
                 revert = true;
-        } else if (ID==2)
+        } else if (ID.Equals("Red"))
         {
             if (Input.GetKey(KeyCode.D))
                 dir = Vector2.right;
@@ -154,7 +154,7 @@ public class Snake : MonoBehaviour
                     break;
                 default: // Collided with Other snakes
                     Debug.Log(coll.gameObject.name);
-                    if (coll.gameObject.name.Equals("Head2") || coll.gameObject.name.Equals("TailPrefab2(Clone)"))
+                    if (coll.gameObject.name.Equals("Head2") || coll.gameObject.name.Equals("TailPrefab2(Clone)")) // Red snake was collided
                     {
                         GameObject player1 = GameObject.Find("Head");
                         foreach(Transform t in tail)
@@ -162,8 +162,12 @@ public class Snake : MonoBehaviour
                             Destroy(t.gameObject);
                         }
                         Destroy(player1);
-                        textComponent.text = "Red Snake Wins!";
-                    } else
+                        if(ID.Equals("Green")) // Green
+                            textComponent.text = "Red Snake Wins!";
+                        else
+                            textComponent.text = "Green Snake Wins!";
+                    }
+                    else // Green snake was collided
                     {
                         GameObject player2 = GameObject.Find("Head2");
                         foreach (Transform t in tail)
@@ -171,7 +175,10 @@ public class Snake : MonoBehaviour
                             Destroy(t.gameObject);
                         }
                         Destroy(player2);
-                        textComponent.text = "Green Snake Wins!";
+                        if (ID.Equals("Green")) // Green
+                            textComponent.text = "Red Snake Wins!";
+                        else
+                            textComponent.text = "Green Snake Wins!";
                     }
                     Time.timeScale = 0;
                     panel.SetActive(true);
