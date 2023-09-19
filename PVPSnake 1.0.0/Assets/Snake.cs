@@ -25,6 +25,9 @@ public class Snake : MonoBehaviour
     // Tail Prefab
     public GameObject tailPrefab;
 
+    // Severed Tail Prefab
+    public GameObject severedTail;
+
     // 1 - Green, 2 - Red
     public string ID;
 
@@ -55,8 +58,12 @@ public class Snake : MonoBehaviour
             else if (Input.GetKey(KeyCode.UpArrow))
                 dir = Vector2.up;
             //revert?
-            else if (Input.GetKeyDown(KeyCode.RightShift))
+            else if (Input.GetKeyDown(KeyCode.Slash))
                 revert = true;
+            // Cut off the tail
+            else if (Input.GetKeyDown(KeyCode.Period))
+                ReplaceTailWithObstacles();
+
         } else if (ID.Equals("Red"))
         {
             if (Input.GetKey(KeyCode.D))
@@ -69,6 +76,8 @@ public class Snake : MonoBehaviour
                 dir = Vector2.up;
             else if (Input.GetKeyDown(KeyCode.E))
                 revert = true;
+            else if (Input.GetKeyDown(KeyCode.R))
+                ReplaceTailWithObstacles();
         }
         /*rsButton.onClick.AddListener(() => {
             SceneManager.LoadScene(0);
@@ -136,7 +145,18 @@ public class Snake : MonoBehaviour
             ate = true;
             // Remove the Food
             Destroy(coll.gameObject);
-        } else
+        }
+        else if (ID.Equals("Green") && coll.name.StartsWith("P1SeveredTail"))
+        {
+            // Player 1 collided with severed tail of Player 1. Do nothing.
+            return; // Exit the method early without further processing.
+        }
+        else if (ID.Equals("Red") && coll.name.StartsWith("P2SeveredTail"))
+        {
+            // Player 2 collided with severed tail of Player 2. Similarly, do nothing.
+            return;
+        }
+        else
         {
             switch (coll.gameObject.name)
             {
@@ -154,7 +174,7 @@ public class Snake : MonoBehaviour
                     break;
                 default: // Collided with Other snakes
                     Debug.Log(coll.gameObject.name);
-                    if (coll.gameObject.name.Equals("Head2") || coll.gameObject.name.Equals("TailPrefab2(Clone)")) // Red snake was collided
+                    if (coll.gameObject.name.Equals("Head2") || coll.gameObject.name.Equals("TailPrefab2(Clone)")|| coll.name.StartsWith("P2SeveredTail")) // Red snake was collided
                     {
                         GameObject player1 = GameObject.Find("Head");
                         foreach(Transform t in tail)
@@ -167,7 +187,7 @@ public class Snake : MonoBehaviour
                         else
                             textComponent.text = "Green Snake Wins!";
                     }
-                    else // Green snake was collided
+                    else if (coll.gameObject.name.Equals("Head") || coll.gameObject.name.Equals("TailPrefab(Clone)")|| coll.name.StartsWith("P1SeveredTail"))// Green snake was collided
                     {
                         GameObject player2 = GameObject.Find("Head2");
                         foreach (Transform t in tail)
@@ -189,6 +209,29 @@ public class Snake : MonoBehaviour
                     }); // restart
                     break;
             }
+        }
+    }
+
+    void ReplaceTailWithObstacles()
+    {
+        // Ensure there are at least 5 tail units to replace
+        if (tail.Count >= 5)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                // Get the last tail unit's position
+                Transform tailPart = tail[tail.Count - 1 - i];
+                Vector2 position = tailPart.position;
+
+                // Destroy the tail unit
+                Destroy(tailPart.gameObject);
+
+                // Create the obstacle at the same position
+                GameObject g = (GameObject)Instantiate(severedTail, position, Quaternion.identity);
+            }
+
+            // Remove the last 5 tail units from the list
+            tail.RemoveRange(tail.Count - 5, 5);
         }
     }
 }
