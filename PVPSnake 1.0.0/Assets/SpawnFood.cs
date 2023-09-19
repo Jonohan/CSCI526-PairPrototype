@@ -16,8 +16,8 @@ public class SpawnFood : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // Spawn food every 4 seconds, starting in 3
-        InvokeRepeating("Spawn", 3, 4);
+        // Spawn food every 2 seconds, starting in 1
+        InvokeRepeating("Spawn", 1, 2);
     }
 
     // Spawn one piece of food

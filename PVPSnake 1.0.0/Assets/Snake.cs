@@ -1,9 +1,11 @@
 // Reference:https://noobtuts.com/unity/2d-snake-game
 
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.SceneManagement;
+using System.Threading;
+using UnityEngine.UI;
 
 public class Snake : MonoBehaviour
 {
@@ -26,11 +28,16 @@ public class Snake : MonoBehaviour
     //Player 1 or Player 2
     public int ID;
 
+    public GameObject panel;
+    public Text textComponent;
+    public Button rsButton;
+
     // Use this for initialization
     void Start()
     {
         // Move the Snake every 300ms
-        InvokeRepeating("Move", 0.3f, 0.3f);
+        InvokeRepeating("Move", 0.2f, 0.2f);
+        panel.SetActive(false);
     }
 
     // Update is called once per frame
@@ -63,8 +70,12 @@ public class Snake : MonoBehaviour
             else if (Input.GetKeyDown(KeyCode.E))
                 revert = true;
         }
+        /*rsButton.onClick.AddListener(() => {
+            SceneManager.LoadScene(0);
+            InvokeRepeating("Move", 0.2f, 0.2f);
+            panel.SetActive(false);
+        }); // restart*/
 
-        
     }
 
     void Move()
@@ -82,7 +93,6 @@ public class Snake : MonoBehaviour
             GameObject g = (GameObject)Instantiate(tailPrefab,
                                                   v,
                                                   Quaternion.identity);
-
             // Keep track of it in our tail list
             tail.Insert(0, g.transform);
 
@@ -124,14 +134,54 @@ public class Snake : MonoBehaviour
         {
             // Get longer in next Move call
             ate = true;
-
             // Remove the Food
             Destroy(coll.gameObject);
-        }
-        // Collided with Tail or Border
-        else
+        } else
         {
-            // ToDo 'You lose' screen
+            switch (coll.gameObject.name)
+            {
+                case "BorderTop":
+                    transform.localPosition = new Vector3(transform.localPosition.x, -transform.localPosition.y + 1, transform.localPosition.z);
+                    break;
+                case "BorderBottom":
+                    transform.localPosition = new Vector3(transform.localPosition.x, -transform.localPosition.y - 1, transform.localPosition.z);
+                    break;
+                case "BorderLeft":
+                    transform.localPosition = new Vector3(-transform.localPosition.x - 1, transform.localPosition.y, transform.localPosition.z);
+                    break;
+                case "BorderRight":
+                    transform.localPosition = new Vector3(-transform.localPosition.x + 1, transform.localPosition.y, transform.localPosition.z);
+                    break;
+                default: // Collided with Other snakes
+                    Debug.Log(coll.gameObject.name);
+                    if (coll.gameObject.name.Equals("Head2") || coll.gameObject.name.Equals("TailPrefab2(Clone)"))
+                    {
+                        GameObject player1 = GameObject.Find("Head");
+                        foreach(Transform t in tail)
+                        {
+                            Destroy(t.gameObject);
+                        }
+                        Destroy(player1);
+                        textComponent.text = "Red Snake Wins!";
+                    } else
+                    {
+                        GameObject player2 = GameObject.Find("Head2");
+                        foreach (Transform t in tail)
+                        {
+                            Destroy(t.gameObject);
+                        }
+                        Destroy(player2);
+                        textComponent.text = "Green Snake Wins!";
+                    }
+                    Time.timeScale = 0;
+                    panel.SetActive(true);
+                    rsButton.onClick.AddListener(() => {
+                        SceneManager.LoadScene(0);
+                        Time.timeScale = 1;
+                        //InvokeRepeating("Move", 0.2f, 0.2f);
+                    }); // restart
+                    break;
+            }
         }
     }
 }
