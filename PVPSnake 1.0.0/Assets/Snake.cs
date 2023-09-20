@@ -14,7 +14,7 @@ public class Snake : MonoBehaviour
     Vector2 dir = Vector2.right;
 
     //head collider
-    Collider2D headColl;
+    BoxCollider2D headColl;
 
     //Revert
     bool revert = false;
@@ -117,14 +117,14 @@ public class Snake : MonoBehaviour
 
     void Move()
     {
-        headColl.transform.position = transform.position;
+        Debug.Log(ID + transform.position);
+        headColl.offset = Vector2.zero;
         Move1StepForward();
         interval--;
 
         if (speedUp > 0)
         {
-            Vector2 v = transform.position;
-            headColl.transform.position = v - dir / 2;
+            headColl.offset = -0.1f * dir;
             speedUp--;
             Move1StepForward();
         }
@@ -209,19 +209,19 @@ public class Snake : MonoBehaviour
             switch (coll.gameObject.name)
             {
                 case "BorderTop":
-                    //Debug.Log(ID + " BorderTop");
+                    Debug.Log(ID + " BorderTop");
                     transform.localPosition = new Vector3(transform.localPosition.x, -14, transform.localPosition.z);
                     break;
                 case "BorderBottom":
-                    //Debug.Log(ID + "BorderBottom");
+                    Debug.Log(ID + "BorderBottom");
                     transform.localPosition = new Vector3(transform.localPosition.x, 14, transform.localPosition.z);
                     break;
                 case "BorderLeft":
-                    //Debug.Log(ID + "BorderLeft");
+                    Debug.Log(ID + "BorderLeft");
                     transform.localPosition = new Vector3(24, transform.localPosition.y, transform.localPosition.z);
                     break;
                 case "BorderRight":
-                    //Debug.Log(ID + "BorderRight");
+                    Debug.Log(ID + "BorderRight");
                     transform.localPosition = new Vector3(-24, transform.localPosition.y, transform.localPosition.z);
                     break;
                 default: // Collided with Other snakes
