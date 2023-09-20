@@ -27,7 +27,9 @@ public class Snake : MonoBehaviour
 
     //Snake will be speeding up
     int speedUp = 0;
-    const int speedUpTime = 10;
+    int interval = 0;
+    const int SPEED_UP_TIME = 10;
+    const int SPEED_UP_INTERVAL = 20;
 
     // Tail Prefab
     public GameObject tailPrefab;
@@ -73,7 +75,14 @@ public class Snake : MonoBehaviour
                 ReplaceTailWithObstacles();
             //Speed up
             else if (Input.GetKeyDown(KeyCode.RightShift))
-                speedUp = speedUpTime;
+            {
+                if (interval <= 0)
+                {
+                    speedUp = SPEED_UP_TIME;
+                    interval = SPEED_UP_INTERVAL + SPEED_UP_TIME;
+                }
+                
+            }
 
         } else if (ID.Equals("Red"))
         {
@@ -90,7 +99,13 @@ public class Snake : MonoBehaviour
             else if (Input.GetKeyDown(KeyCode.R))
                 ReplaceTailWithObstacles();
             else if (Input.GetKeyDown(KeyCode.Q))
-                speedUp = speedUpTime;
+            {
+                if (interval <= 0)
+                {
+                    speedUp = SPEED_UP_TIME;
+                    interval = SPEED_UP_INTERVAL + SPEED_UP_TIME;
+                }
+            }
         }
         /*rsButton.onClick.AddListener(() => {
             SceneManager.LoadScene(0);
@@ -103,10 +118,8 @@ public class Snake : MonoBehaviour
     void Move()
     {
         headColl.transform.position = transform.position;
-        if (ID.Equals("Green"))
-            Debug.Log(ID+headColl.transform.position);
-
         Move1StepForward();
+        interval--;
 
         if (speedUp > 0)
         {
@@ -196,24 +209,47 @@ public class Snake : MonoBehaviour
             switch (coll.gameObject.name)
             {
                 case "BorderTop":
-                    Debug.Log(ID + " BorderTop");
-                    transform.localPosition = new Vector3(transform.localPosition.x, -transform.localPosition.y + 1, transform.localPosition.z);
-                    headColl.transform.position = transform.position;
+                    //Debug.Log(ID + " BorderTop");
+                    if (speedUp > 0)
+                    {
+                        transform.localPosition = new Vector3(transform.localPosition.x, -transform.localPosition.y + 2, transform.localPosition.z);
+                    } else
+                    {
+                        transform.localPosition = new Vector3(transform.localPosition.x, -transform.localPosition.y + 1, transform.localPosition.z);
+                    }
                     break;
                 case "BorderBottom":
-                    Debug.Log(ID + "BorderBottom");
-                    transform.localPosition = new Vector3(transform.localPosition.x, -transform.localPosition.y - 1, transform.localPosition.z);
-                    headColl.transform.position = transform.position;
+                    //Debug.Log(ID + "BorderBottom");
+                    if (speedUp > 0)
+                    {
+                        transform.localPosition = new Vector3(transform.localPosition.x, -transform.localPosition.y - 2, transform.localPosition.z);
+                    }
+                    else
+                    {
+                        transform.localPosition = new Vector3(transform.localPosition.x, -transform.localPosition.y - 1, transform.localPosition.z);
+                    }
                     break;
                 case "BorderLeft":
-                    Debug.Log(ID + "BorderLeft");
-                    transform.localPosition = new Vector3(-transform.localPosition.x - 1, transform.localPosition.y, transform.localPosition.z);
-                    headColl.transform.position = transform.position;
+                    //Debug.Log(ID + "BorderLeft");
+                    if (speedUp > 0)
+                    {
+                        transform.localPosition = new Vector3(-transform.localPosition.x - 2, transform.localPosition.y, transform.localPosition.z);
+                    }
+                    else
+                    {
+                        transform.localPosition = new Vector3(-transform.localPosition.x - 1, transform.localPosition.y, transform.localPosition.z);
+                    }
                     break;
                 case "BorderRight":
-                    Debug.Log(ID + "BorderRight");
-                    transform.localPosition = new Vector3(-transform.localPosition.x + 1, transform.localPosition.y, transform.localPosition.z);
-                    headColl.transform.position = transform.position;
+                    //Debug.Log(ID + "BorderRight");
+                    if (speedUp > 0)
+                    {
+                        transform.localPosition = new Vector3(-transform.localPosition.x + 2, transform.localPosition.y, transform.localPosition.z);
+                    }
+                    else
+                    {
+                        transform.localPosition = new Vector3(-transform.localPosition.x + 1, transform.localPosition.y, transform.localPosition.z);
+                    }
                     break;
                 default: // Collided with Other snakes
                     Debug.Log(coll.gameObject.name);
